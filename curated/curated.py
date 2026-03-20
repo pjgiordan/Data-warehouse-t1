@@ -149,4 +149,3 @@ fact_sales.to_sql(
 )
 
 print(f"fact_sales loaded into curated.fact_sales ({len(fact_sales)} rows)")
-
