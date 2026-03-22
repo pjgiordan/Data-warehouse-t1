@@ -61,9 +61,14 @@ df.loc[invalid_sales & valid_price, "sls_sales"] = (
     df.loc[invalid_sales & valid_price, "sls_price"] * df.loc[invalid_sales & valid_price, "sls_quantity"]
 )
 
-# 4. Sales == price but quantity > 1 → price is correct, recalculate sales
-wrong_sales = (df["sls_sales"] == df["sls_price"]) & (df["sls_quantity"] > 1)
-df.loc[wrong_sales, "sls_sales"] = df.loc[wrong_sales, "sls_price"] * df.loc[wrong_sales, "sls_quantity"]
+# 4. Sales != price * quantity → price is correct, recalculate sales
+valid_price = df["sls_price"].notna() & (df["sls_price"] > 0)
+valid_quantity = df["sls_quantity"].notna() & (df["sls_quantity"] > 0)
+wrong_sales = df["sls_sales"] != (df["sls_price"] * df["sls_quantity"])
+df.loc[wrong_sales & valid_price & valid_quantity, "sls_sales"] = (
+    df.loc[wrong_sales & valid_price & valid_quantity, "sls_price"]
+    * df.loc[wrong_sales & valid_price & valid_quantity, "sls_quantity"]
+)
 
 # Drop and recreate the table in transformation schema
 cursor.execute("DROP TABLE IF EXISTS transformation.crm_sales_details")
